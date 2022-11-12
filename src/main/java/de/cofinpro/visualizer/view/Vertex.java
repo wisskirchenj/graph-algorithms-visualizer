@@ -17,19 +17,29 @@ import java.awt.Graphics;
 @Getter
 public class Vertex extends JPanel {
 
+    @Getter
+    private static final int VERTEX_RADIUS = 50;
+    @Getter
+    private static final Color VERTEX_COLOR = Color.YELLOW;
+
     private Color labelBackground = Color.WHITE;
 
+    public Vertex(String label) {
+        super();
+        setName("Vertex %s".formatted(label));
+        setLabelBackground(VERTEX_COLOR);
+        setSize(VERTEX_RADIUS, VERTEX_RADIUS);
+    }
+
     /**
-     * draw a filled white circle and afterwards(!) paint the label component
-     * @param graphics the <code>Graphics</code> context in which to paint
+     * draw a filled white circle in the vertex panel
+     * @param graphics the <code>Graphics</code> object to protect
      */
-    @Override
-    public void paint(Graphics graphics) {
-        super.paint(graphics);
-        int sideLength = getHeight();
+    @Override   // paintComponent only draws the container - not its contents
+    public void paintComponent(Graphics graphics) {
+        super.paintComponent(graphics);
         graphics.setColor(labelBackground);
-        graphics.fillOval(0, 0, sideLength, sideLength);
-        paintComponents(graphics);
+        graphics.fillOval(0, 0, VERTEX_RADIUS, VERTEX_RADIUS);
     }
 
     /**
@@ -39,14 +49,7 @@ public class Vertex extends JPanel {
         var label = new JLabel(labelText);
         label.setName("VertexLabel %s".formatted(labelText));
         label.setForeground(getBackground());
-        label.setFont(new Font("Arial", Font.BOLD, (int)(0.8 * getHeight())));
+        label.setFont(new Font("Arial", Font.BOLD,  VERTEX_RADIUS * 4 / 5));
         add(label);
-    }
-
-    /**
-     * set height and width to same value given
-     */
-    public void setSize(int sideLength) {
-        setBounds(0, 0, sideLength, sideLength);
     }
 }
