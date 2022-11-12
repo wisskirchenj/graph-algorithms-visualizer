@@ -31,3 +31,6 @@ Have fun!
 
 11.11.22 Project started and Stage 1 completed, drawing of a black JPanel graph with 4 vertices in the edges 
 (Vertex consists of Jpanel with Jlabel in it and overwritten paint(g) method to draw a circle around label).
+
+12.11.22 Stage 2 completed. Vertices can be added by mouse click in the graph canvas. In this case
+an input dialog pops up and asks for a 1 char vertex label - can be cancelled...

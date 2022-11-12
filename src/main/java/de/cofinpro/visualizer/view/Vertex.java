@@ -19,15 +19,16 @@ public class Vertex extends JPanel {
 
     @Getter
     private static final int VERTEX_RADIUS = 50;
-    @Getter
     private static final Color VERTEX_COLOR = Color.YELLOW;
 
     private Color labelBackground = Color.WHITE;
 
-    public Vertex(String label) {
+    public Vertex(String label, Color background) {
         super();
         setName("Vertex %s".formatted(label));
+        setBackground(background);
         setLabelBackground(VERTEX_COLOR);
+        addLabel(label);
         setSize(VERTEX_RADIUS, VERTEX_RADIUS);
     }
 
