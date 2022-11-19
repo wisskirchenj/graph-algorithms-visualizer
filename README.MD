@@ -34,3 +34,8 @@ Have fun!
 
 12.11.22 Stage 2 completed. Vertices can be added by mouse click in the graph canvas. In this case
 an input dialog pops up and asks for a 1 char vertex label - can be cancelled...
+
+19.11.22 Stage 3 completed. Mode Menu added to a Menu bar, that switches between, "Add Vertex", "Add Edge" and "None".
+In the Add Edge mode, the first click on a vertex selects this one (and highlights it in color) and a click on a second
+vertex then lets the user input a weight via modal dialog. Then an edge is drawn between these two vertices and a label 
+is placed near the center of the edge. -> interesting stage with a lot of paint, Graphics and JComponent-Methods used.
