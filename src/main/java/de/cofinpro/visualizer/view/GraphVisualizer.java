@@ -1,7 +1,7 @@
 package de.cofinpro.visualizer.view;
 
-import de.cofinpro.visualizer.controller.ModeMenuListener;
-import de.cofinpro.visualizer.model.GraphModel;
+import de.cofinpro.visualizer.controller.ModeMenuItemListener;
+import de.cofinpro.visualizer.model.ApplicationModel;
 import de.cofinpro.visualizer.model.Mode;
 
 import javax.swing.JFrame;
@@ -16,6 +16,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Point;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.util.Arrays;
 
 import static de.cofinpro.visualizer.view.Vertex.*;
@@ -31,7 +33,7 @@ public class GraphVisualizer extends JFrame {
     private static final int GRAPH_HEIGHT = 600;
     private static final int HEIGHT_OFFSET = 72;
 
-    private final GraphModel graphModel = new GraphModel();
+    private final ApplicationModel applicationModel = new ApplicationModel();
 
     public GraphVisualizer() {
         super(TITLE);
@@ -50,7 +52,7 @@ public class GraphVisualizer extends JFrame {
         var statusPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         statusPanel.setBackground(PANEL_COLOR);
         var statusLabel = new StatusLabel(Mode.START_MODE.getModeName());
-        graphModel.registerListener(statusLabel);
+        applicationModel.registerListener(statusLabel);
         statusPanel.add(statusLabel);
         return statusPanel;
     }
@@ -59,29 +61,52 @@ public class GraphVisualizer extends JFrame {
      * create the graph panel with vertices placed in all four corners
      */
     private Container createGraph() {
-        var graph = new GraphPanel(null);
+        var graph = new GraphPanel(applicationModel.getGraphModel());
         graph.setBackground(PANEL_COLOR);
         addCornerVertices(graph);
-        graphModel.registerListener(graph);
+        applicationModel.registerListener(graph);
         return graph;
     }
 
     private JMenuBar createMenuBar() {
-        JMenuBar menubar = new JMenuBar();
+        var menubar = new JMenuBar();
         menubar.setName("MenuBar");
-        JMenu modeMenu = new JMenu("Mode");
+        menubar.add(createFileMenu());
+        menubar.add(createModeMenu());
+        return menubar;
+    }
+
+    private JMenu createFileMenu() {
+        var fileMenu = new JMenu("File");
+        fileMenu.setName("File");
+        fileMenu.add(createMenuItem("New", e -> applicationModel.requestResetGraph()));
+        fileMenu.add(createMenuItem("Exit",
+                e -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING))));
+        return fileMenu;
+    }
+
+    private JMenu createModeMenu() {
+        var modeMenu = new JMenu("Mode");
         modeMenu.setName("Mode");
         modeMenu.add(createMenuItem(Mode.ADD_VERTEX));
         modeMenu.add(createMenuItem(Mode.ADD_EDGE));
+        modeMenu.add(createMenuItem(Mode.REMOVE_VERTEX));
+        modeMenu.add(createMenuItem(Mode.REMOVE_EDGE));
         modeMenu.add(createMenuItem(Mode.NONE));
-        menubar.add(modeMenu);
-        return menubar;
+        return modeMenu;
+    }
+
+    private JMenuItem createMenuItem(String name, ActionListener actionListener) {
+        JMenuItem menuItem = new JMenuItem(name);
+        menuItem.setName(name);
+        menuItem.addActionListener(actionListener);
+        return menuItem;
     }
 
     private JMenuItem createMenuItem(Mode mode) {
         JMenuItem menuItem = new JMenuItem(mode.getModeName());
         menuItem.setName(mode.getModeName());
-        menuItem.addActionListener(new ModeMenuListener(mode, graphModel));
+        menuItem.addActionListener( new ModeMenuItemListener(mode, applicationModel));
         return menuItem;
     }
 

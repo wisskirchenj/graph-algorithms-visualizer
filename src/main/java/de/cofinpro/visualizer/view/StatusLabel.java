@@ -1,7 +1,7 @@
 package de.cofinpro.visualizer.view;
 
-import de.cofinpro.visualizer.controller.GraphModelListener;
-import de.cofinpro.visualizer.model.GraphModel;
+import de.cofinpro.visualizer.controller.ApplicationModelListener;
+import de.cofinpro.visualizer.model.ApplicationModel;
 
 import javax.swing.JLabel;
 import java.awt.Color;
@@ -9,9 +9,9 @@ import java.awt.Font;
 
 /**
  * The status Label (extends JLabel) that sits on top of the graph panel and displays the current Mode selection by
- * listening for Mode updates of the GraphModel.
+ * listening for Mode updates of the ApplicationModel.
  */
-public class StatusLabel extends JLabel implements GraphModelListener {
+public class StatusLabel extends JLabel implements ApplicationModelListener {
 
     private static final Color FG_COLOR = Color.BLACK;
 
@@ -23,7 +23,7 @@ public class StatusLabel extends JLabel implements GraphModelListener {
     }
 
     @Override
-    public void update(GraphModel model) {
+    public void update(ApplicationModel model) {
         setText("Current Mode -> %s".formatted(model.getMode().getModeName()));
     }
 }

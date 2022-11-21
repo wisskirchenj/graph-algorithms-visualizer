@@ -1,7 +1,8 @@
 package de.cofinpro.visualizer.view;
 
 import de.cofinpro.visualizer.controller.GraphClickListener;
-import de.cofinpro.visualizer.controller.GraphModelListener;
+import de.cofinpro.visualizer.controller.ApplicationModelListener;
+import de.cofinpro.visualizer.model.ApplicationModel;
 import de.cofinpro.visualizer.model.GraphModel;
 import de.cofinpro.visualizer.model.Mode;
 
@@ -10,57 +11,46 @@ import lombok.Getter;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.BasicStroke;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.LayoutManager;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Line2D;
-import java.util.Arrays;
 import java.util.Optional;
 
 /**
  * JPanel derived Container class for vertices and edges etc. - e.g. representing the graph.
  */
-public class GraphPanel extends JPanel implements GraphModelListener {
+public class GraphPanel extends JPanel implements ApplicationModelListener {
 
+    private final GraphModel model;
     private Vertex selected = null;
     @Getter
     private Mode mode = Mode.START_MODE;
 
-    public GraphPanel(LayoutManager layout) {
-        super(layout);
+    public GraphPanel(GraphModel model) {
+        super(null);
+        this.model = model;
         setName("Graph");
         addMouseListener(new GraphClickListener(this));
     }
 
     /**
-     * dynamically add a vertex with given label and location to the graph.
-     */
-    public void addVertex(String label, Point location) {
-        var vertex = new Vertex(label, getBackground());
-        vertex.setLocation(location);
-        add(vertex);
-        revalidate();
-        repaint();
-    }
-
-    /**
-     * find and return the vertex at the given point - or Optional.empty(), if the point is not inside a vertex circle.
-     */
-    public Optional<Vertex> getVertexAt(Point point) {
-        return Optional.ofNullable(getComponentAt(point) instanceof Vertex v && v.isInside(point) ? v : null);
-    }
-
-    /**
-     * GraphModelListener method, that is called on user changing the Mode in the menu. The mode is stored for use
+     * ApplicationModelListener method, that is called on user changing the Mode in the menu. The mode is stored for use
      * in the MouseAdapter and a possible selection of a vertex is undone.
      */
     @Override
-    public void update(GraphModel model) {
-        mode = model.getMode();
+    public void update(ApplicationModel applicationModel) {
+        mode = applicationModel.getMode();
         getSelected().ifPresent(Vertex::unselect);
         selected = null;
+        if (applicationModel.isNewGraphRequested()) {
+            model.clear();
+            removeAll();
+            repaint();
+        }
     }
 
     /**
@@ -81,21 +71,45 @@ public class GraphPanel extends JPanel implements GraphModelListener {
     }
 
     /**
-     * add edges between the vertices given (in both directions), and position a weight label at the edge.
+     * find and return the vertex at the given point - or Optional.empty(), if the point is not inside a vertex circle.
      */
-    public void addEdge(String weight, Vertex first, Vertex second) {
-        add(new Edge(first, second));
-        add(new Edge(second, first));
-        addWeightLabel(weight, first, second);
+    public Optional<Vertex> getVertexAt(Point point) {
+        return Optional.ofNullable(getComponentAt(point) instanceof Vertex v && v.isInside(point) ? v : null);
+    }
+
+    /**
+     * dynamically add a vertex with given label and location to the graph.
+     */
+    public void addVertex(String label, Point location) {
+        var vertex = new Vertex(label, getBackground());
+        vertex.setLocation(location);
+        model.addVertex(vertex);
+        add(vertex);
         revalidate();
         repaint();
     }
 
     /**
-     * create an appropriately named edge weight label with given weight and place & add it to the GraphPanel near the
-     * midpoint of the associated edge.
+     * add edges between the vertices given (in both directions), and position a weight label at the edge.
      */
-    private void addWeightLabel(String weight, Vertex first, Vertex second) {
+    public void addEdge(String weight, Vertex first, Vertex second) {
+        var edge = new Edge(first, second);
+        edge.setBounds(new Rectangle(new Point((first.getCenter().x + second.getCenter().x) / 2 - 10,
+                (first.getCenter().y + second.getCenter().y) / 2 - 10), new Dimension(20, 20)));
+        add(edge);
+        var reversedEdge = new Edge(second, first);
+        add(reversedEdge);
+        var weightLabel = createWeightLabel(weight, first, second);
+        add(weightLabel);
+        model.addEdge(edge, reversedEdge, weightLabel);
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * create an appropriately named edge weight label with given weight and place it near the midpoint of the associated edge.
+     */
+    private JLabel createWeightLabel(String weight, Vertex first, Vertex second) {
         var position = getLabelPosition(first.getCenter(), second.getCenter());
         var label = new JLabel(weight);
         label.setName("EdgeLabel <%s -> %s>".formatted(first.getVertexLabel(), second.getVertexLabel()));
@@ -103,7 +117,7 @@ public class GraphPanel extends JPanel implements GraphModelListener {
         int fontSize = Vertex.getVERTEX_RADIUS() * 2 / 5;
         label.setFont(new Font("Arial", Font.BOLD, fontSize));
         label.setBounds(position.x, position.y, fontSize, fontSize);
-        add(label);
+        return label;
     }
 
     /**
@@ -123,6 +137,24 @@ public class GraphPanel extends JPanel implements GraphModelListener {
     }
 
     /**
+     * delegate remove request to the model, which returns all the swing components, the panel must remove.
+     */
+    public void removeVertexWithAssociateEdges(Vertex vertex) {
+        var componentsToRemove = model.removeVertexWithEdges(vertex);
+        componentsToRemove.forEach(this::remove);
+        repaint();
+    }
+
+    /**
+     * delegate remove request to the model, which returns all the swing components, the panel must remove.
+     */
+    public void removeEdge(Edge edge) {
+        var componentsToRemove = model.removeEdge(edge);
+        componentsToRemove.forEach(this::remove);
+        repaint();
+    }
+
+    /**
      * overriden to paint the edges as thick lines using BasicStroke - before (and thus underneath) the vertices and labels.
      */
     @Override
@@ -130,10 +162,7 @@ public class GraphPanel extends JPanel implements GraphModelListener {
         Graphics2D g2D = (Graphics2D) g;
         g2D.setColor(Vertex.getVERTEX_COLOR());
         g2D.setStroke(new BasicStroke(Vertex.getVERTEX_RADIUS() / 10f));
-        Arrays.stream(getComponents()).filter(Edge.class::isInstance).forEach(e -> {
-            Edge edge = (Edge) e;
-            g2D.draw(new Line2D.Float(edge.getStart(), edge.getEnd()));
-        });
+        model.getEdges().forEach(e -> g2D.draw(new Line2D.Float(e.getStart(), e.getEnd())));
         super.paintChildren(g2D);
     }
 }

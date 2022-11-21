@@ -1,6 +1,7 @@
 package de.cofinpro.visualizer.controller;
 
 import de.cofinpro.visualizer.model.Mode;
+import de.cofinpro.visualizer.view.Edge;
 import de.cofinpro.visualizer.view.GraphPanel;
 import de.cofinpro.visualizer.view.Vertex;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import static de.cofinpro.visualizer.view.Vertex.*;
 @Slf4j
 public class GraphClickListener extends MouseAdapter {
 
+    private static final String VERTEX_CLICKED = "Vertex {} clicked!";
     private static final int CLICK_OFFSET = getVERTEX_RADIUS() / 2;
 
     private final GraphPanel graphPanel;
@@ -32,12 +34,35 @@ public class GraphClickListener extends MouseAdapter {
     @Override
     public void mouseClicked(MouseEvent event) {
         log.debug("Mouse clicked {}", event.getPoint());
+        log.debug("Hit component: {}", graphPanel.getComponentAt(event.getPoint()));
         switch (graphPanel.getMode()) {
             case ADD_VERTEX -> handlePlaceVertex(event);
             case ADD_EDGE -> handleEdgePlacement(event);
+            case REMOVE_VERTEX -> handleRemoveVertex(event);
+            case REMOVE_EDGE -> handleRemoveEdge(event);
             case NONE -> { /* do nothing */ }
             default -> throw new IllegalStateException("Unexpected value: " + graphPanel.getMode());
         }
+    }
+
+    /**
+     * check, if an edge was clicked and if so delegate the removal to the GraphPanel.
+     */
+    private void handleRemoveEdge(MouseEvent event) {
+        if (graphPanel.getComponentAt(event.getPoint()) instanceof Edge edge) {
+            log.debug("Edge '{}' clicked ", edge.getName());
+            graphPanel.removeEdge(edge);
+        }
+    }
+
+    /**
+     * check, if a vertex was clicked and if so delegate the removal with connected edges to the GraphPanel.
+     */
+    private void handleRemoveVertex(MouseEvent event) {
+        graphPanel.getVertexAt(event.getPoint()).ifPresent(vertex -> {
+            log.debug(VERTEX_CLICKED, vertex.getVertexLabel());
+            graphPanel.removeVertexWithAssociateEdges(vertex);
+        });
     }
 
     /**
@@ -46,7 +71,7 @@ public class GraphClickListener extends MouseAdapter {
      */
     private void handleEdgePlacement(MouseEvent event) {
         graphPanel.getVertexAt(event.getPoint()).ifPresent(vertex -> {
-            log.debug("Vertex {} clicked!", vertex.getVertexLabel());
+            log.debug(VERTEX_CLICKED, vertex.getVertexLabel());
             graphPanel.getSelected()
                     .ifPresentOrElse(selected -> addEdge(selected, vertex), () -> graphPanel.setSelected(vertex));
         });
@@ -71,7 +96,7 @@ public class GraphClickListener extends MouseAdapter {
      */
     private void handlePlaceVertex(MouseEvent event) {
         graphPanel.getVertexAt(event.getPoint()).ifPresentOrElse(vertex ->
-            log.debug("Vertex {} clicked!", vertex.getVertexLabel()),
+            log.debug(VERTEX_CLICKED, vertex.getVertexLabel()),
                 () -> new Dialog().getLabelFromDialog().ifPresent(label -> graphPanel.addVertex(label,
                         new Point(event.getX() - CLICK_OFFSET, event.getY() - CLICK_OFFSET)))
         );
