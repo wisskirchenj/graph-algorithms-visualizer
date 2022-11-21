@@ -4,12 +4,17 @@ import de.cofinpro.visualizer.view.Edge;
 import de.cofinpro.visualizer.view.Vertex;
 import lombok.Getter;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import java.awt.Component;
+import java.awt.Point;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * model class to keep track of the SwingComponents in the GraphPanel. Also, vertex connections and the
@@ -50,9 +55,9 @@ public class GraphModel implements Serializable {
      * remove given vertex and all associated edges
      * @return all swing components removed within the model
      */
-    public Set<Component> removeVertexWithEdges(Vertex vertex) {
+    public Collection<Component> removeVertexWithEdges(Vertex vertex) {
         var treeVertex = vertices.get(vertex.getCenter());
-        Set<Component> componentsToRemove = new HashSet<>();
+        Collection<Component> componentsToRemove = new HashSet<>();
         componentsToRemove.add(vertex);
         treeVertex.getEdges().forEach(treeEdge -> removeEdgeFromModelAndAddComponents(componentsToRemove, treeEdge));
         vertices.remove(vertex.getCenter());
@@ -63,7 +68,7 @@ public class GraphModel implements Serializable {
      * for the given TreeEdge add edge components to remove to given set, remove them from the edges-list
      * and remove the opposite TreeEdge from the neighbor-vertex.
      */
-    private void removeEdgeFromModelAndAddComponents(Set<Component> componentsToRemove, TreeEdge treeEdge) {
+    private void removeEdgeFromModelAndAddComponents(Collection<Component> componentsToRemove, TreeEdge treeEdge) {
         componentsToRemove.addAll(treeEdge.getEdgeComponents());
         edges.remove(treeEdge.to());
         edges.remove(treeEdge.from());
@@ -76,9 +81,9 @@ public class GraphModel implements Serializable {
      * remove given edge from list and associated TreeEdges from both connecting vertices.
      * @return all swing (edge) components removed within the model
      */
-    public Set<Component> removeEdge(Edge edge) {
+    public Collection<Component> removeEdge(Edge edge) {
         var start = vertices.get(edge.getStart());
-        Set<Component> edgeComponentsToRemove = new HashSet<>();
+        Collection<Component> edgeComponentsToRemove = new HashSet<>();
         var optional = start.getEdges().stream().filter(te -> te.from() == edge).findFirst();
         optional.ifPresent(treeEdge -> {
             removeEdgeFromModelAndAddComponents(edgeComponentsToRemove, treeEdge);

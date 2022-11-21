@@ -37,7 +37,7 @@ public class Vertex extends JPanel {
     }
 
     /**
-     * draw a filled white circle in the vertex panel
+     * draw a filled circle in labelBackgroundColor into the vertex panel
      * @param graphics the <code>Graphics</code> object to protect
      */
     @Override   // paintComponent only draws the container - not its contents
@@ -47,7 +47,7 @@ public class Vertex extends JPanel {
     }
 
     /**
-     * adds a label with given text and appropriate scaled font size to fin in the center of the circle drawn
+     * adds a label with given text and appropriate scaled font size to the vertex
      */
     public void addLabel(String labelText) {
         var label = new JLabel(labelText);

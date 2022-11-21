@@ -37,7 +37,7 @@ public class GraphClickListener extends MouseAdapter {
         log.debug("Hit component: {}", graphPanel.getComponentAt(event.getPoint()));
         switch (graphPanel.getMode()) {
             case ADD_VERTEX -> handlePlaceVertex(event);
-            case ADD_EDGE -> handleEdgePlacement(event);
+            case ADD_EDGE -> handlePlaceEdge(event);
             case REMOVE_VERTEX -> handleRemoveVertex(event);
             case REMOVE_EDGE -> handleRemoveEdge(event);
             case NONE -> { /* do nothing */ }
@@ -69,7 +69,7 @@ public class GraphClickListener extends MouseAdapter {
      * method called on mouse clicks in the graph panel, when in Add_EDGE mode. If a vertex circle was hit by the mouse click,
      * an edge is created and added, if another vertex was already selected, or the clicked vertex is selected, if none was before.
      */
-    private void handleEdgePlacement(MouseEvent event) {
+    private void handlePlaceEdge(MouseEvent event) {
         graphPanel.getVertexAt(event.getPoint()).ifPresent(vertex -> {
             log.debug(VERTEX_CLICKED, vertex.getVertexLabel());
             graphPanel.getSelected()
@@ -92,14 +92,13 @@ public class GraphClickListener extends MouseAdapter {
 
     /**
      * method called on mouse clicks in the graph panel, when in Add_VERTEX mode, that places a new vertex with center at
-     * mouse click position.
+     * mouse click position, if there is room (i.e. no other vertex or edge).
      */
     private void handlePlaceVertex(MouseEvent event) {
-        graphPanel.getVertexAt(event.getPoint()).ifPresentOrElse(vertex ->
-            log.debug(VERTEX_CLICKED, vertex.getVertexLabel()),
-                () -> new Dialog().getLabelFromDialog().ifPresent(label -> graphPanel.addVertex(label,
-                        new Point(event.getX() - CLICK_OFFSET, event.getY() - CLICK_OFFSET)))
-        );
+        if (graphPanel.getComponentAt(event.getPoint()) instanceof GraphPanel) {
+            new Dialog().getLabelFromDialog().ifPresent(label -> graphPanel.addVertex(label,
+                    new Point(event.getX() - CLICK_OFFSET, event.getY() - CLICK_OFFSET)));
+        }
     }
 
     /**
@@ -108,8 +107,8 @@ public class GraphClickListener extends MouseAdapter {
     private class Dialog {
 
         private static final Map<Mode, Predicate<String>> VALIDATORS = Map.of(
-                Mode.ADD_VERTEX, input -> input != null && (input.isBlank() || input.length() != 1),
-                Mode.ADD_EDGE, input -> input != null && !input.matches("[+-]?\\d")
+                Mode.ADD_VERTEX, input -> input == null || input.length() == 1 && !input.isBlank(),
+                Mode.ADD_EDGE, input -> input == null || input.matches("[+-]?\\d")
         );
         private static final Map<Mode, String> DIALOG_TITLES = Map.of(
                 Mode.ADD_VERTEX, "Vertex",
@@ -128,7 +127,7 @@ public class GraphClickListener extends MouseAdapter {
                         DIALOG_MESSAGES.get(currentMode),
                         DIALOG_TITLES.get(currentMode),
                         JOptionPane.QUESTION_MESSAGE);
-            } while (VALIDATORS.get(currentMode).test(label));
+            } while (!VALIDATORS.get(currentMode).test(label));
             return Optional.ofNullable(label);
         }
     }

@@ -29,7 +29,7 @@ public class ApplicationModel implements Serializable {
         listeners.add(listener);
     }
 
-    public void notifyListeners() {
+    private void notifyListeners() {
         listeners.forEach(listener -> listener.update(this));
     }
 

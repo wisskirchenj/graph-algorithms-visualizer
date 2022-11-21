@@ -3,8 +3,8 @@ package de.cofinpro.visualizer.model;
 
 import de.cofinpro.visualizer.view.Edge;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import java.awt.Component;
 import java.util.Collection;
 import java.util.Set;
 

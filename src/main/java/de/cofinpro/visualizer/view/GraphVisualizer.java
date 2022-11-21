@@ -106,7 +106,7 @@ public class GraphVisualizer extends JFrame {
     private JMenuItem createMenuItem(Mode mode) {
         JMenuItem menuItem = new JMenuItem(mode.getModeName());
         menuItem.setName(mode.getModeName());
-        menuItem.addActionListener( new ModeMenuItemListener(mode, applicationModel));
+        menuItem.addActionListener(new ModeMenuItemListener(mode, applicationModel));
         return menuItem;
     }
 
