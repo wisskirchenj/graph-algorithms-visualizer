@@ -39,3 +39,9 @@ an input dialog pops up and asks for a 1 char vertex label - can be cancelled...
 In the Add Edge mode, the first click on a vertex selects this one (and highlights it in color) and a click on a second
 vertex then lets the user input a weight via modal dialog. Then an edge is drawn between these two vertices and a label 
 is placed near the center of the edge. -> interesting stage with a lot of paint, Graphics and JComponent-Methods used.
+
+21.11.22 Stage 4 completed. File Menu (New and Exit) added. Also added the modes "Remove a Vertex" and "Remove an Edge"
+to the Mode Menu. For that to work, we introduced a GraphModel, that models the Vertex-Edge Connections of the
+user-created graph and also groups the otherwise not well associated components (label, edge, reverse) of an edge.
+To remove a vertex just click on it with the mode selected (all associated edges are removed too). And to remove
+an edge click on the center of the edge (i.e. near midpoint of the drawn line).
