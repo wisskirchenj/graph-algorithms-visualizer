@@ -14,11 +14,31 @@ public class Edge extends JComponent {
 
     private final Point start;
     private final Point end;
+    private boolean selected;
 
     public Edge(Vertex from, Vertex to) {
         super();
         setName("Edge <%s -> %s>".formatted(from.getVertexLabel(), to.getVertexLabel()));
         this.start = from.getCenter();
         this.end = to.getCenter();
+    }
+
+    /**
+     * switch an edge into selected stage and call parent (=GraphPanel's) repaint
+     */
+    public void select() {
+        if (!selected) {
+            selected = true;
+            getParent().repaint();
+        }
+    }
+    /**
+     * switch an edge into unselected stage and call parent (=GraphPanel's) repaint
+     */
+    public void unselect() {
+        if (selected) {
+            selected = false;
+            getParent().repaint();
+        }
     }
 }

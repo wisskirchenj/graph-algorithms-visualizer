@@ -20,4 +20,8 @@ public record TreeEdge(Edge from, Edge to, JLabel weightLabel, TreeVertex neighb
     public Collection<Component> getEdgeComponents() {
         return Set.of(from, to, weightLabel);
     }
+
+    public String toString() {
+        return "TreeEdge{from: " + from.getName() + ", to: " + to.getName() + ", wright: " + weightLabel.getName() + "}";
+    }
 }

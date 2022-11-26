@@ -21,8 +21,9 @@ public class Vertex extends JPanel {
     @Getter
     private static final int VERTEX_RADIUS = 50;
     @Getter
-    private static final Color VERTEX_COLOR = Color.YELLOW;
-    private static final Color VERTEX_SELECTED_COLOR = Color.ORANGE;
+    private static final Color VERTEX_COLOR = Color.WHITE;
+    @Getter
+    private static final Color VERTEX_SELECTED_COLOR = Color.YELLOW;
 
     private final String vertexLabel;
     private Color labelBackground = VERTEX_COLOR;

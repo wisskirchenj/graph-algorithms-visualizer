@@ -34,7 +34,6 @@ public class GraphClickListener extends MouseAdapter {
     @Override
     public void mouseClicked(MouseEvent event) {
         log.debug("Mouse clicked {}", event.getPoint());
-        log.debug("Hit component: {}", graphPanel.getComponentAt(event.getPoint()));
         switch (graphPanel.getMode()) {
             case ADD_VERTEX -> handlePlaceVertex(event);
             case ADD_EDGE -> handlePlaceEdge(event);
@@ -51,6 +50,7 @@ public class GraphClickListener extends MouseAdapter {
     private void handleRemoveEdge(MouseEvent event) {
         if (graphPanel.getComponentAt(event.getPoint()) instanceof Edge edge) {
             log.debug("Edge '{}' clicked ", edge.getName());
+            log.debug("removing edge {}.", edge.getName());
             graphPanel.removeEdge(edge);
         }
     }
@@ -60,7 +60,7 @@ public class GraphClickListener extends MouseAdapter {
      */
     private void handleRemoveVertex(MouseEvent event) {
         graphPanel.getVertexAt(event.getPoint()).ifPresent(vertex -> {
-            log.debug(VERTEX_CLICKED, vertex.getVertexLabel());
+            log.debug("removing vertex {}.", vertex.getVertexLabel());
             graphPanel.removeVertexWithAssociateEdges(vertex);
         });
     }
@@ -96,8 +96,10 @@ public class GraphClickListener extends MouseAdapter {
      */
     private void handlePlaceVertex(MouseEvent event) {
         if (graphPanel.getComponentAt(event.getPoint()) instanceof GraphPanel) {
-            new Dialog().getLabelFromDialog().ifPresent(label -> graphPanel.addVertex(label,
-                    new Point(event.getX() - CLICK_OFFSET, event.getY() - CLICK_OFFSET)));
+            new Dialog().getLabelFromDialog().ifPresent(label -> {
+                graphPanel.addVertex(label, new Point(event.getX() - CLICK_OFFSET, event.getY() - CLICK_OFFSET));
+                log.debug("adding vertex {} at {}.", label, event.getPoint());
+            });
         }
     }
 
@@ -108,7 +110,7 @@ public class GraphClickListener extends MouseAdapter {
 
         private static final Map<Mode, Predicate<String>> VALIDATORS = Map.of(
                 Mode.ADD_VERTEX, input -> input == null || input.length() == 1 && !input.isBlank(),
-                Mode.ADD_EDGE, input -> input == null || input.matches("[+-]?\\d")
+                Mode.ADD_EDGE, input -> input == null || input.matches("[+-]?\\d{1,2}")
         );
         private static final Map<Mode, String> DIALOG_TITLES = Map.of(
                 Mode.ADD_VERTEX, "Vertex",

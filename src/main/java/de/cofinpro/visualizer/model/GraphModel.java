@@ -9,16 +9,18 @@ import java.awt.Component;
 import java.awt.Point;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * model class to keep track of the SwingComponents in the GraphPanel. Also, vertex connections and the
- * grouping of edges with reversed edges and their label are modeled.
+ * grouping of edges with reversed edges and their label are modeled and the tree traversal are performed.
  */
 public class GraphModel implements Serializable {
 
@@ -98,5 +100,98 @@ public class GraphModel implements Serializable {
     public void clear() {
         vertices.clear();
         edges.clear();
+    }
+
+    /**
+     * unselect all vertices and edges.
+     */
+    public void unselect() {
+        vertices.values().forEach(treeVertex -> {
+            treeVertex.setVisited(false);
+            unselectVertex(treeVertex.getVertex());
+        });
+        edges.forEach(Edge::unselect);
+    }
+
+    public void selectVertex(Vertex vertex) {
+        vertices.get(vertex.getCenter()).setSelected(true);
+        vertex.select();
+    }
+
+
+    public void unselectVertex(Vertex vertex) {
+        vertices.get(vertex.getCenter()).setSelected(false);
+        vertex.unselect();
+    }
+
+    private void selectVertex(TreeVertex vertex) {
+        vertex.setVisited(true);
+        vertex.setSelected(true);
+        vertex.getVertex().select();
+    }
+
+    /**
+     * called from Algorithm.Player and traverses the tree for one more edge and vertex (marking by colors)
+     * @param edge the TreeEdge pointing towards the vertex to select.
+     */
+    public void selectEdgeAndNeighborVertex(TreeEdge edge) {
+        selectVertex(edge.neighborVertex());
+        if (edges.contains(edge.from())) {
+            edge.from().select();
+        } else {
+            edge.to().select();
+        }
+    }
+
+    /**
+     * entry point to perform a DFS on this graph model - calls private recursive method
+     * @param startVertex the start vertex for DFS
+     * @return deque containing the TreeEdges in the order of traversal
+     */
+    public Queue<TreeEdge> depthFirstSearch(Vertex startVertex) {
+        Queue<TreeEdge> traverseQueue = new ArrayDeque<>();
+        var start = vertices.get(startVertex.getCenter());
+        selectVertex(start);
+        return depthFirstSearch(traverseQueue, start);
+    }
+
+    private Queue<TreeEdge> depthFirstSearch(Queue<TreeEdge> traverseQueue, TreeVertex vertex) {
+        for (var edge: vertex.getEdges()) {
+            if (!edge.neighborVertex().isVisited()) {
+                edge.neighborVertex().setVisited(true);
+                traverseQueue.offer(edge);
+                depthFirstSearch(traverseQueue, edge.neighborVertex());
+            }
+        }
+        return traverseQueue;
+    }
+
+    /**
+     * entry point to perform a BFS on this graph model - calls private recursive method
+     * @param startVertex the start vertex for DFS
+     * @return deque containing the TreeEdges in the order of traversal
+     */
+    public Queue<TreeEdge> breadthFirstSearch(Vertex startVertex) {
+        Queue<TreeEdge> traverseQueue = new ArrayDeque<>();
+        var start = vertices.get(startVertex.getCenter());
+        selectVertex(start);
+        return breadthFirstSearch(traverseQueue, List.of(vertices.get(startVertex.getCenter())));
+    }
+
+    private Queue<TreeEdge> breadthFirstSearch(Queue<TreeEdge> traverseQueue, List<TreeVertex> levelVertices) {
+        if (levelVertices.isEmpty()) {
+            return traverseQueue;
+        }
+        var unvisitedNeighborEdges = levelVertices.stream()
+                .flatMap(vertex -> vertex.getEdges().stream())
+                .filter(edge -> !edge.neighborVertex().isVisited()).toList();
+        unvisitedNeighborEdges.forEach(edge -> {
+            if (!edge.neighborVertex().isVisited()) {
+                edge.neighborVertex().setVisited(true);
+                traverseQueue.offer(edge);
+            }
+        });
+        breadthFirstSearch(traverseQueue, unvisitedNeighborEdges.stream().map(TreeEdge::neighborVertex).toList());
+        return traverseQueue;
     }
 }

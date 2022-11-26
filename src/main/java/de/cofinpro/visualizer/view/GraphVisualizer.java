@@ -1,6 +1,8 @@
 package de.cofinpro.visualizer.view;
 
+import de.cofinpro.visualizer.controller.AlgorithmMenuItemListener;
 import de.cofinpro.visualizer.controller.ModeMenuItemListener;
+import de.cofinpro.visualizer.model.AlgorithmType;
 import de.cofinpro.visualizer.model.ApplicationModel;
 import de.cofinpro.visualizer.model.Mode;
 
@@ -27,11 +29,11 @@ import static de.cofinpro.visualizer.view.Vertex.*;
  */
 public class GraphVisualizer extends JFrame {
 
-    private static final Color PANEL_COLOR = Color.PINK.darker();
+    static final Color PANEL_COLOR = Color.PINK.darker();
     private static final String TITLE = "Graph-Algorithms Visualizer";
     private static final int GRAPH_WIDTH = 800;
     private static final int GRAPH_HEIGHT = 600;
-    private static final int HEIGHT_OFFSET = 72;
+    private static final int HEIGHT_OFFSET = 105;
 
     private final ApplicationModel applicationModel = new ApplicationModel();
 
@@ -45,6 +47,7 @@ public class GraphVisualizer extends JFrame {
         setJMenuBar(createMenuBar());
         add(createStatusPanel(), BorderLayout.NORTH);
         add(createGraph(), BorderLayout.CENTER);
+        add(createDisplayPanel(), BorderLayout.SOUTH);
         setVisible(true);
     }
 
@@ -68,11 +71,21 @@ public class GraphVisualizer extends JFrame {
         return graph;
     }
 
+    private Component createDisplayPanel() {
+        var displayPanel = new JPanel(new FlowLayout());
+        displayPanel.setBackground(PANEL_COLOR);
+        var displayLabel = new ResultLabel(" ");
+        applicationModel.registerListener(displayLabel);
+        displayPanel.add(displayLabel);
+        return displayPanel;
+    }
+
     private JMenuBar createMenuBar() {
         var menubar = new JMenuBar();
         menubar.setName("MenuBar");
         menubar.add(createFileMenu());
         menubar.add(createModeMenu());
+        menubar.add(createAlgorithmMenu());
         return menubar;
     }
 
@@ -96,6 +109,14 @@ public class GraphVisualizer extends JFrame {
         return modeMenu;
     }
 
+    private JMenu createAlgorithmMenu() {
+        var algorithmMenu = new JMenu("Algorithms");
+        algorithmMenu.setName("Algorithms");
+        algorithmMenu.add(createMenuItem(AlgorithmType.DEPTH_FIRST));
+        algorithmMenu.add(createMenuItem(AlgorithmType.BREADTH_FIRST));
+        return algorithmMenu;
+    }
+
     private JMenuItem createMenuItem(String name, ActionListener actionListener) {
         JMenuItem menuItem = new JMenuItem(name);
         menuItem.setName(name);
@@ -107,6 +128,13 @@ public class GraphVisualizer extends JFrame {
         JMenuItem menuItem = new JMenuItem(mode.getModeName());
         menuItem.setName(mode.getModeName());
         menuItem.addActionListener(new ModeMenuItemListener(mode, applicationModel));
+        return menuItem;
+    }
+
+    private Component createMenuItem(AlgorithmType algorithmType) {
+        JMenuItem menuItem = new JMenuItem(algorithmType.getAlgorithmName());
+        menuItem.setName(algorithmType.getAlgorithmName());
+        menuItem.addActionListener(new AlgorithmMenuItemListener(algorithmType, applicationModel));
         return menuItem;
     }
 

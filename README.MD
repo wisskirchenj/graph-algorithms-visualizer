@@ -45,3 +45,8 @@ to the Mode Menu. For that to work, we introduced a GraphModel, that models the 
 user-created graph and also groups the otherwise not well associated components (label, edge, reverse) of an edge.
 To remove a vertex just click on it with the mode selected (all associated edges are removed too). And to remove
 an edge click on the center of the edge (i.e. near midpoint of the drawn line).
+
+26.11.22 Stage 5 completed. Algorithm Menu (Depth First Search and Bread First Search) added. 
+When an algorithm is selected, the user is asked to click on a start vertex for the graph traversal. After that, the
+traversal algorithm runs and stores its orders into a queue, which is played ba a swing timer graphical showing the
+traversal by highlighting each traversed edge and vertex in slow motion.

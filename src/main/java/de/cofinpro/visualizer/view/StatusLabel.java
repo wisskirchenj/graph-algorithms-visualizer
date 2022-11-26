@@ -1,7 +1,7 @@
 package de.cofinpro.visualizer.view;
 
 import de.cofinpro.visualizer.controller.ApplicationModelListener;
-import de.cofinpro.visualizer.model.ApplicationModel;
+import de.cofinpro.visualizer.model.Mode;
 
 import javax.swing.JLabel;
 import java.awt.Color;
@@ -23,7 +23,7 @@ public class StatusLabel extends JLabel implements ApplicationModelListener {
     }
 
     @Override
-    public void update(ApplicationModel model) {
-        setText("Current Mode -> %s".formatted(model.getMode().getModeName()));
+    public void updateMode(Mode mode) {
+        setText("Current Mode -> %s".formatted(mode.getModeName()));
     }
 }

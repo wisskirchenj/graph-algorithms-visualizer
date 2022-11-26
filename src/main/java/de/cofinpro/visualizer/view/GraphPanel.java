@@ -1,8 +1,9 @@
 package de.cofinpro.visualizer.view;
 
+import de.cofinpro.visualizer.controller.Algorithm;
 import de.cofinpro.visualizer.controller.GraphClickListener;
 import de.cofinpro.visualizer.controller.ApplicationModelListener;
-import de.cofinpro.visualizer.model.ApplicationModel;
+import de.cofinpro.visualizer.model.AlgorithmModel;
 import de.cofinpro.visualizer.model.GraphModel;
 import de.cofinpro.visualizer.model.Mode;
 
@@ -27,6 +28,7 @@ public class GraphPanel extends JPanel implements ApplicationModelListener {
 
     private final GraphModel model;
     private Vertex selected = null;
+    private transient Algorithm runningAlgorithm = null;
     @Getter
     private Mode mode = Mode.START_MODE;
 
@@ -42,14 +44,37 @@ public class GraphPanel extends JPanel implements ApplicationModelListener {
      * in the MouseAdapter and a possible selection of a vertex is undone.
      */
     @Override
-    public void update(ApplicationModel applicationModel) {
-        mode = applicationModel.getMode();
-        getSelected().ifPresent(Vertex::unselect);
+    public void updateMode(Mode mode) {
+        this.mode = mode;
+        model.unselect();
         selected = null;
-        if (applicationModel.isNewGraphRequested()) {
+        if (mode == Mode.RESET_MODE) {
+            this.mode = Mode.START_MODE;
             model.clear();
             removeAll();
             repaint();
+        }
+    }
+
+    /**
+     * store the running algorithm and add it as mause listener (to choose a start vertex).
+     */
+    @Override
+    public void updateAlgorithm(Algorithm algorithm) {
+        this.runningAlgorithm = algorithm;
+        algorithm.setGraphPanel(this);
+        addMouseListener(algorithm);
+    }
+
+    /**
+     * listen to stop-algorithm''s in which case the running algorithm is removed as mouse listener.
+     */
+    @Override
+    public void updateAlgorithmState(AlgorithmModel algorithmModel) {
+        if (algorithmModel.getState() == AlgorithmModel.State.STOPPED) {
+            removeMouseListener(runningAlgorithm);
+            runningAlgorithm.stopPlaying();
+            runningAlgorithm = null;
         }
     }
 
@@ -59,7 +84,7 @@ public class GraphPanel extends JPanel implements ApplicationModelListener {
     public void setSelected(Vertex vertex) {
         selected = vertex;
         if (vertex != null) {
-            vertex.select();
+            model.selectVertex(vertex);
         }
     }
 
@@ -116,7 +141,7 @@ public class GraphPanel extends JPanel implements ApplicationModelListener {
         label.setForeground(Vertex.getVERTEX_COLOR());
         int fontSize = Vertex.getVERTEX_RADIUS() * 2 / 5;
         label.setFont(new Font("Arial", Font.BOLD, fontSize));
-        label.setBounds(position.x, position.y, fontSize, fontSize);
+        label.setBounds(position.x, position.y, fontSize * 3 / 2, fontSize * 3 / 2);
         return label;
     }
 
@@ -160,9 +185,11 @@ public class GraphPanel extends JPanel implements ApplicationModelListener {
     @Override
     public void paintChildren(Graphics g) {
         Graphics2D g2D = (Graphics2D) g;
-        g2D.setColor(Vertex.getVERTEX_COLOR());
         g2D.setStroke(new BasicStroke(Vertex.getVERTEX_RADIUS() / 10f));
-        model.getEdges().forEach(e -> g2D.draw(new Line2D.Float(e.getStart(), e.getEnd())));
+        model.getEdges().forEach(e -> {
+            g2D.setColor(e.isSelected() ? Vertex.getVERTEX_SELECTED_COLOR() : Vertex.getVERTEX_COLOR());
+            g2D.draw(new Line2D.Float(e.getStart(), e.getEnd()));
+        });
         super.paintChildren(g2D);
     }
 }

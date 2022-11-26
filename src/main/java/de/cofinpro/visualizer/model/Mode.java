@@ -10,6 +10,7 @@ import lombok.Getter;
 @Getter
 public enum Mode {
     NONE("None"),
+    RESET_MODE("Add a Vertex"),
     ADD_VERTEX("Add a Vertex"),
     ADD_EDGE("Add an Edge"),
     REMOVE_VERTEX("Remove a Vertex"),

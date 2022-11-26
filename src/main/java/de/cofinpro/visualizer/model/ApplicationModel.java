@@ -1,17 +1,22 @@
 package de.cofinpro.visualizer.model;
 
+import de.cofinpro.visualizer.controller.Algorithm;
 import de.cofinpro.visualizer.controller.ApplicationModelListener;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static de.cofinpro.visualizer.model.AlgorithmModel.State.STOPPED;
+
 /**
  * ApplicationModel state class, that stores the GraphModel and selected Mode. It keeps a list of registered listeners,
  * which are notified on changes.
  */
+@Slf4j
 public class ApplicationModel implements Serializable {
 
     @Serial
@@ -19,29 +24,74 @@ public class ApplicationModel implements Serializable {
 
     @Getter
     private final GraphModel graphModel = new GraphModel();
-    @Getter
+    private transient AlgorithmModel algorithmModel = null;
     private Mode mode = Mode.START_MODE;
-    @Getter
-    private boolean newGraphRequested = false;
+
     private final transient List<ApplicationModelListener> listeners = new ArrayList<>();
 
     public void registerListener(ApplicationModelListener listener) {
         listeners.add(listener);
     }
 
-    private void notifyListeners() {
-        listeners.forEach(listener -> listener.update(this));
+    private void notifyModeUpdate() {
+        listeners.forEach(listener -> listener.updateMode(mode));
     }
 
+    private void notifyAlgorithmUpdate(Algorithm algorithm) {
+        listeners.forEach(listener -> listener.updateAlgorithm(algorithm));
+    }
+
+    private void notifyAlgorithmStateUpdate(AlgorithmModel algorithmModel) {
+        listeners.forEach(listener -> listener.updateAlgorithmState(algorithmModel));
+    }
+
+    /**
+     * on mode change, an algorithm possibly waiting for a vertex choice is stopped.
+     * @param mode the changed mode selected.
+     */
     public void setMode(Mode mode) {
         this.mode = mode;
-        notifyListeners();
+        if (algorithmIsRunning()) {
+            switchAlgorithmState(STOPPED);
+        }
+        log.debug("setting mode to {}.", mode.getModeName());
+        notifyModeUpdate();
     }
 
+    private boolean algorithmIsRunning() {
+        return algorithmModel != null && algorithmModel.getState() != STOPPED;
+    }
+
+    public void switchAlgorithmState(AlgorithmModel.State newState) {
+        algorithmModel.setState(newState);
+        log.debug("switching algorithm state to {}.", newState.name());
+        notifyAlgorithmStateUpdate(algorithmModel);
+    }
+
+    /**
+     * callback used by algorithm to propagate a result string after termination.
+     */
+    public void propagateAlgorithmResult(String result) {
+        algorithmModel.setResultText(result);
+        switchAlgorithmState(AlgorithmModel.State.TERMINATED);
+    }
+
+    /**
+     * create and start the algorithm of given type and notify listeners.
+     * @param algorithmType the type of algorithm to start.
+     */
+    public void startAlgorithm(AlgorithmType algorithmType) {
+        setMode(Mode.NONE);
+        notifyAlgorithmUpdate(algorithmType.getAlgorithmProducer().get().setApplicationModel(this));
+        algorithmModel = new AlgorithmModel();
+        log.debug("starting algorithm {}.", algorithmType.getAlgorithmName());
+        notifyAlgorithmStateUpdate(algorithmModel);
+    }
+
+    /**
+     * request a full graph and graph model reset (as triggered by File->New)
+     */
     public void requestResetGraph() {
-        mode = Mode.START_MODE;
-        newGraphRequested = true;
-        notifyListeners();
-        newGraphRequested = false;
+        setMode(Mode.RESET_MODE);
     }
 }
