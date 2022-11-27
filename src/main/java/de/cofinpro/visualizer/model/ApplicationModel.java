@@ -24,8 +24,7 @@ public class ApplicationModel implements Serializable {
 
     @Getter
     private final GraphModel graphModel = new GraphModel();
-    private transient AlgorithmModel algorithmModel = null;
-    private Mode mode = Mode.START_MODE;
+    private transient AlgorithmModel algorithmModel;
 
     private final transient List<ApplicationModelListener> listeners = new ArrayList<>();
 
@@ -33,7 +32,7 @@ public class ApplicationModel implements Serializable {
         listeners.add(listener);
     }
 
-    private void notifyModeUpdate() {
+    private void notifyModeUpdate(Mode mode) {
         listeners.forEach(listener -> listener.updateMode(mode));
     }
 
@@ -46,16 +45,15 @@ public class ApplicationModel implements Serializable {
     }
 
     /**
-     * on mode change, an algorithm possibly waiting for a vertex choice is stopped.
+     * on mode change, a possibly running algorithm is stopped.
      * @param mode the changed mode selected.
      */
     public void setMode(Mode mode) {
-        this.mode = mode;
         if (algorithmIsRunning()) {
             switchAlgorithmState(STOPPED);
         }
         log.debug("setting mode to {}.", mode.getModeName());
-        notifyModeUpdate();
+        notifyModeUpdate(mode);
     }
 
     private boolean algorithmIsRunning() {

@@ -13,6 +13,7 @@ import java.awt.Font;
 public class ResultLabel extends JLabel implements ApplicationModelListener {
 
     private static final Color FG_COLOR = Color.BLACK;
+
     public ResultLabel(String text) {
         super(text);
         setName("Display");

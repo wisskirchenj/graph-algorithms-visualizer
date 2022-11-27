@@ -50,3 +50,7 @@ an edge click on the center of the edge (i.e. near midpoint of the drawn line).
 When an algorithm is selected, the user is asked to click on a start vertex for the graph traversal. After that, the
 traversal algorithm runs and stores its orders into a queue, which is played ba a swing timer graphical showing the
 traversal by highlighting each traversed edge and vertex in slow motion.
+
+27.11.22 Stage 6 completed. Algorithm Menu got new item "Dijkstra's Algorithm", which if chosen asks the user to click on
+a start vertex (as all algorithm) and then performs a Dijkstra search to calculate the shortest paths to all other vertices
+based on the edge weights given. The result is displyed in the status bar.

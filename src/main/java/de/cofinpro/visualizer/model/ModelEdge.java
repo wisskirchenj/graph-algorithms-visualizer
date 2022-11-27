@@ -9,10 +9,10 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * Immutable TreeEdge structure to be used in the GraphModel, that groups the Swing components of an edge and
- * has the neighbor vertex, the edge connects to. It "sits in" a TreeVertex's edge list.
+ * Immutable ModelEdge structure to be used in the GraphModel, that groups the Swing components of an edge and
+ * has the neighbor vertex, the edge connects to. It "sits in" a ModelVertex's edge list.
  */
-public record TreeEdge(Edge from, Edge to, JLabel weightLabel, TreeVertex neighborVertex) {
+public record ModelEdge(Edge from, Edge to, JLabel weightLabel, ModelVertex neighborVertex) {
 
     /**
      * convenience method that returns only the edge associated swing components as a set (2 Edges and JLabel)
@@ -21,7 +21,8 @@ public record TreeEdge(Edge from, Edge to, JLabel weightLabel, TreeVertex neighb
         return Set.of(from, to, weightLabel);
     }
 
+    @Override
     public String toString() {
-        return "TreeEdge{from: " + from.getName() + ", to: " + to.getName() + ", wright: " + weightLabel.getName() + "}";
+        return "ModelEdge{from: " + from.getName() + ", to: " + to.getName() + ", weight: " + weightLabel.getName() + "}";
     }
 }

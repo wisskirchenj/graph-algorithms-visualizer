@@ -19,7 +19,7 @@ import java.awt.Point;
 public class Vertex extends JPanel {
 
     @Getter
-    private static final int VERTEX_RADIUS = 50;
+    private static final int VERTEX_DIAMETER = 50;
     @Getter
     private static final Color VERTEX_COLOR = Color.WHITE;
     @Getter
@@ -34,7 +34,7 @@ public class Vertex extends JPanel {
         setName("Vertex %s".formatted(label));
         setBackground(background);
         addLabel(label);
-        setSize(VERTEX_RADIUS, VERTEX_RADIUS);
+        setSize(VERTEX_DIAMETER, VERTEX_DIAMETER);
     }
 
     /**
@@ -44,7 +44,7 @@ public class Vertex extends JPanel {
     @Override   // paintComponent only draws the container - not its contents
     public void paintComponent(Graphics graphics) {
         graphics.setColor(labelBackground);
-        graphics.fillOval(0, 0, VERTEX_RADIUS, VERTEX_RADIUS);
+        graphics.fillOval(0, 0, VERTEX_DIAMETER, VERTEX_DIAMETER);
     }
 
     /**
@@ -54,7 +54,7 @@ public class Vertex extends JPanel {
         var label = new JLabel(labelText);
         label.setName("VertexLabel %s".formatted(labelText));
         label.setForeground(getBackground());
-        label.setFont(new Font("Arial", Font.BOLD,  VERTEX_RADIUS * 4 / 5));
+        label.setFont(new Font("Arial", Font.BOLD,  VERTEX_DIAMETER * 4 / 5));
         add(label);
     }
 
@@ -89,13 +89,13 @@ public class Vertex extends JPanel {
      * @param point a point to check for
      */
     public boolean isInside(Point point) {
-        return point.distance(getCenter()) <= VERTEX_RADIUS / 2.0;
+        return point.distance(getCenter()) <= VERTEX_DIAMETER / 2.0;
     }
 
     /**
      * calculate and return the vertex center as Point
      */
     public Point getCenter() {
-        return new Point(getX() + VERTEX_RADIUS / 2, getY() + VERTEX_RADIUS / 2);
+        return new Point(getX() + VERTEX_DIAMETER / 2, getY() + VERTEX_DIAMETER / 2);
     }
 }

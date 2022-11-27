@@ -20,7 +20,7 @@ import java.util.Queue;
 
 /**
  * model class to keep track of the SwingComponents in the GraphPanel. Also, vertex connections and the
- * grouping of edges with reversed edges and their label are modeled and the tree traversal are performed.
+ * grouping of edges with reversed edges and their label are modeled and the graph traversal are performed.
  */
 public class GraphModel implements Serializable {
 
@@ -30,27 +30,31 @@ public class GraphModel implements Serializable {
     /**
      * vertices are a map with the vertex coordinates as key (since their name may not be unique).
      */
-    private final Map<Point, TreeVertex> vertices = new HashMap<>();
+    private final Map<Point, ModelVertex> vertices = new HashMap<>();
     @Getter
     private final List<Edge> edges = new ArrayList<>();
 
     /**
-     * create a TreeVertex from the Vertex and put it to the map
+     * create a ModelVertex from the Vertex and put it to the map
      */
     public void addVertex(Vertex vertex) {
-        vertices.put(vertex.getCenter(), new TreeVertex(vertex));
+        vertices.put(vertex.getCenter(), new ModelVertex(vertex));
     }
 
     /**
-     * the three edge-associated Swing components are bundled into a TreeEdge and together with the destination
-     * vertex added to the start and end TreeVertex. Also, the original edge is added to a simple list - used in paint.
+     * the three edge-associated Swing components are bundled into a ModelEdge and together with the destination
+     * vertex added to the start and end ModelVertex. Also, the original edge is added to a simple list - used in paint.
      */
     public void addEdge(Edge edge, Edge reversedEdge, JLabel weightLabel) {
         edges.add(edge);
         var start = vertices.get(edge.getStart());
         var end = vertices.get(edge.getEnd());
-        start.addTreeEdge(new TreeEdge(edge, reversedEdge, weightLabel, end));
-        end.addTreeEdge(new TreeEdge(reversedEdge, edge, weightLabel, start));
+        start.addModelEdge(new ModelEdge(edge, reversedEdge, weightLabel, end));
+        end.addModelEdge(new ModelEdge(reversedEdge, edge, weightLabel, start));
+    }
+
+    public ModelVertex getModelVertex(Vertex vertex) {
+        return vertices.get(vertex.getCenter());
     }
 
     /**
@@ -58,38 +62,38 @@ public class GraphModel implements Serializable {
      * @return all swing components removed within the model
      */
     public Collection<Component> removeVertexWithEdges(Vertex vertex) {
-        var treeVertex = vertices.get(vertex.getCenter());
+        var modelVertex = vertices.get(vertex.getCenter());
         Collection<Component> componentsToRemove = new HashSet<>();
         componentsToRemove.add(vertex);
-        treeVertex.getEdges().forEach(treeEdge -> removeEdgeFromModelAndAddComponents(componentsToRemove, treeEdge));
+        modelVertex.getEdges().forEach(modelEdge -> removeEdgeFromModelAndAddComponents(componentsToRemove, modelEdge));
         vertices.remove(vertex.getCenter());
         return componentsToRemove;
     }
 
     /**
-     * for the given TreeEdge add edge components to remove to given set, remove them from the edges-list
-     * and remove the opposite TreeEdge from the neighbor-vertex.
+     * for the given ModelEdge add edge components to remove to given set, remove them from the edges-list
+     * and remove the opposite ModelEdge from the neighbor-vertex.
      */
-    private void removeEdgeFromModelAndAddComponents(Collection<Component> componentsToRemove, TreeEdge treeEdge) {
-        componentsToRemove.addAll(treeEdge.getEdgeComponents());
-        edges.remove(treeEdge.to());
-        edges.remove(treeEdge.from());
-        var oppositeTreeEdge = treeEdge.neighborVertex().getEdges().stream()
-                .filter(te -> te.to() == treeEdge.from()).findFirst();
-        oppositeTreeEdge.ifPresent(treeEdge.neighborVertex().getEdges()::remove);
+    private void removeEdgeFromModelAndAddComponents(Collection<Component> componentsToRemove, ModelEdge modelEdge) {
+        componentsToRemove.addAll(modelEdge.getEdgeComponents());
+        edges.remove(modelEdge.to());
+        edges.remove(modelEdge.from());
+        var oppositeModelEdge = modelEdge.neighborVertex().getEdges().stream()
+                .filter(me -> me.to() == modelEdge.from()).findFirst();
+        oppositeModelEdge.ifPresent(modelEdge.neighborVertex().getEdges()::remove);
     }
 
     /**
-     * remove given edge from list and associated TreeEdges from both connecting vertices.
+     * remove given edge from list and associated ModelEdges from both connecting vertices.
      * @return all swing (edge) components removed within the model
      */
     public Collection<Component> removeEdge(Edge edge) {
         var start = vertices.get(edge.getStart());
         Collection<Component> edgeComponentsToRemove = new HashSet<>();
-        var optional = start.getEdges().stream().filter(te -> te.from() == edge).findFirst();
-        optional.ifPresent(treeEdge -> {
-            removeEdgeFromModelAndAddComponents(edgeComponentsToRemove, treeEdge);
-            start.getEdges().remove(treeEdge);
+        var optional = start.getEdges().stream().filter(me -> me.from() == edge).findFirst();
+        optional.ifPresent(modelEdge -> {
+            removeEdgeFromModelAndAddComponents(edgeComponentsToRemove, modelEdge);
+            start.getEdges().remove(modelEdge);
         });
         return edgeComponentsToRemove;
     }
@@ -106,9 +110,10 @@ public class GraphModel implements Serializable {
      * unselect all vertices and edges.
      */
     public void unselect() {
-        vertices.values().forEach(treeVertex -> {
-            treeVertex.setVisited(false);
-            unselectVertex(treeVertex.getVertex());
+        vertices.values().forEach(modelVertex -> {
+            modelVertex.setVisited(false);
+            modelVertex.setSelected(false);
+            modelVertex.getVertex().unselect();
         });
         edges.forEach(Edge::unselect);
     }
@@ -118,23 +123,17 @@ public class GraphModel implements Serializable {
         vertex.select();
     }
 
-
-    public void unselectVertex(Vertex vertex) {
-        vertices.get(vertex.getCenter()).setSelected(false);
-        vertex.unselect();
-    }
-
-    private void selectVertex(TreeVertex vertex) {
+    private void selectVertex(ModelVertex vertex) {
         vertex.setVisited(true);
         vertex.setSelected(true);
         vertex.getVertex().select();
     }
 
     /**
-     * called from Algorithm.Player and traverses the tree for one more edge and vertex (marking by colors)
-     * @param edge the TreeEdge pointing towards the vertex to select.
+     * called from Algorithm.Player and traverses the graph for one more edge and vertex (marking by colors)
+     * @param edge the ModelEdge pointing towards the vertex to select.
      */
-    public void selectEdgeAndNeighborVertex(TreeEdge edge) {
+    public void selectEdgeAndNeighborVertex(ModelEdge edge) {
         selectVertex(edge.neighborVertex());
         if (edges.contains(edge.from())) {
             edge.from().select();
@@ -146,16 +145,16 @@ public class GraphModel implements Serializable {
     /**
      * entry point to perform a DFS on this graph model - calls private recursive method
      * @param startVertex the start vertex for DFS
-     * @return deque containing the TreeEdges in the order of traversal
+     * @return Queue containing the ModelEdges in the order of traversal
      */
-    public Queue<TreeEdge> depthFirstSearch(Vertex startVertex) {
-        Queue<TreeEdge> traverseQueue = new ArrayDeque<>();
+    public Queue<ModelEdge> depthFirstSearch(Vertex startVertex) {
+        Queue<ModelEdge> traverseQueue = new ArrayDeque<>();
         var start = vertices.get(startVertex.getCenter());
         selectVertex(start);
         return depthFirstSearch(traverseQueue, start);
     }
 
-    private Queue<TreeEdge> depthFirstSearch(Queue<TreeEdge> traverseQueue, TreeVertex vertex) {
+    private Queue<ModelEdge> depthFirstSearch(Queue<ModelEdge> traverseQueue, ModelVertex vertex) {
         for (var edge: vertex.getEdges()) {
             if (!edge.neighborVertex().isVisited()) {
                 edge.neighborVertex().setVisited(true);
@@ -169,16 +168,16 @@ public class GraphModel implements Serializable {
     /**
      * entry point to perform a BFS on this graph model - calls private recursive method
      * @param startVertex the start vertex for DFS
-     * @return deque containing the TreeEdges in the order of traversal
+     * @return Queue containing the ModelEdges in the order of traversal
      */
-    public Queue<TreeEdge> breadthFirstSearch(Vertex startVertex) {
-        Queue<TreeEdge> traverseQueue = new ArrayDeque<>();
+    public Queue<ModelEdge> breadthFirstSearch(Vertex startVertex) {
+        Queue<ModelEdge> traverseQueue = new ArrayDeque<>();
         var start = vertices.get(startVertex.getCenter());
         selectVertex(start);
         return breadthFirstSearch(traverseQueue, List.of(vertices.get(startVertex.getCenter())));
     }
 
-    private Queue<TreeEdge> breadthFirstSearch(Queue<TreeEdge> traverseQueue, List<TreeVertex> levelVertices) {
+    private Queue<ModelEdge> breadthFirstSearch(Queue<ModelEdge> traverseQueue, List<ModelVertex> levelVertices) {
         if (levelVertices.isEmpty()) {
             return traverseQueue;
         }
@@ -191,7 +190,7 @@ public class GraphModel implements Serializable {
                 traverseQueue.offer(edge);
             }
         });
-        breadthFirstSearch(traverseQueue, unvisitedNeighborEdges.stream().map(TreeEdge::neighborVertex).toList());
+        breadthFirstSearch(traverseQueue, unvisitedNeighborEdges.stream().map(ModelEdge::neighborVertex).toList());
         return traverseQueue;
     }
 }

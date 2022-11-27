@@ -23,7 +23,7 @@ import static de.cofinpro.visualizer.view.Vertex.*;
 public class GraphClickListener extends MouseAdapter {
 
     private static final String VERTEX_CLICKED = "Vertex {} clicked!";
-    private static final int CLICK_OFFSET = getVERTEX_RADIUS() / 2;
+    private static final int CLICK_OFFSET = getVERTEX_DIAMETER() / 2;
 
     private final GraphPanel graphPanel;
 

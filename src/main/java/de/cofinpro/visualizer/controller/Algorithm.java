@@ -2,7 +2,7 @@ package de.cofinpro.visualizer.controller;
 
 import de.cofinpro.visualizer.model.AlgorithmModel;
 import de.cofinpro.visualizer.model.ApplicationModel;
-import de.cofinpro.visualizer.model.TreeEdge;
+import de.cofinpro.visualizer.model.ModelEdge;
 import de.cofinpro.visualizer.view.GraphPanel;
 import de.cofinpro.visualizer.view.Vertex;
 import lombok.Getter;
@@ -76,9 +76,9 @@ public abstract class Algorithm extends MouseAdapter {
 
         private static final int ALGORITHM_PLAY_DELAY = 700; //millisecs
         private Timer playTimer;
-        private Queue<TreeEdge> playList;
+        private Queue<ModelEdge> playList;
 
-        protected void play(Queue<TreeEdge> traverseQueue) {
+        protected void play(Queue<ModelEdge> traverseQueue) {
             playList = traverseQueue;
             playTimer = new Timer(ALGORITHM_PLAY_DELAY, this);
             playTimer.start();

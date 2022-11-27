@@ -1,7 +1,7 @@
 package de.cofinpro.visualizer.controller;
 
-import de.cofinpro.visualizer.model.TreeEdge;
-import de.cofinpro.visualizer.model.TreeVertex;
+import de.cofinpro.visualizer.model.ModelEdge;
+import de.cofinpro.visualizer.model.ModelVertex;
 import de.cofinpro.visualizer.view.Vertex;
 
 import java.util.stream.Collectors;
@@ -16,8 +16,8 @@ public class BreadthFirstSearch extends Algorithm {
         var traverseQueue = getApplicationModel().getGraphModel().breadthFirstSearch(vertex);
         String result = "BFS : " + vertex.getVertexLabel();
         if (!traverseQueue.isEmpty()) {
-            result += " -> " + traverseQueue.stream().map(TreeEdge::neighborVertex)
-                    .map(TreeVertex::getVertex).map(Vertex::getVertexLabel).collect(Collectors.joining(" -> "));
+            result += " -> " + traverseQueue.stream().map(ModelEdge::neighborVertex)
+                    .map(ModelVertex::getVertex).map(Vertex::getVertexLabel).collect(Collectors.joining(" -> "));
         }
         setResult(result);
         getPlayer().play(traverseQueue);

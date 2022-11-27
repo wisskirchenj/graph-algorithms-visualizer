@@ -139,7 +139,7 @@ public class GraphPanel extends JPanel implements ApplicationModelListener {
         var label = new JLabel(weight);
         label.setName("EdgeLabel <%s -> %s>".formatted(first.getVertexLabel(), second.getVertexLabel()));
         label.setForeground(Vertex.getVERTEX_COLOR());
-        int fontSize = Vertex.getVERTEX_RADIUS() * 2 / 5;
+        int fontSize = Vertex.getVERTEX_DIAMETER() * 2 / 5;
         label.setFont(new Font("Arial", Font.BOLD, fontSize));
         label.setBounds(position.x, position.y, fontSize * 3 / 2, fontSize * 3 / 2);
         return label;
@@ -152,7 +152,7 @@ public class GraphPanel extends JPanel implements ApplicationModelListener {
     private static Point getLabelPosition(Point first, Point second) {
         var midPoint = new Point((first.x + second.x) / 2, (first.y + second.y) / 2);
         Point position;
-        int del = Vertex.getVERTEX_RADIUS() / 10;
+        int del = Vertex.getVERTEX_DIAMETER() / 10;
         if ((second.y - first.y) * (second.x - first.x) < 0) {
             position = new Point(midPoint.x + del, midPoint.y + del);
         } else {
@@ -185,7 +185,7 @@ public class GraphPanel extends JPanel implements ApplicationModelListener {
     @Override
     public void paintChildren(Graphics g) {
         Graphics2D g2D = (Graphics2D) g;
-        g2D.setStroke(new BasicStroke(Vertex.getVERTEX_RADIUS() / 10f));
+        g2D.setStroke(new BasicStroke(Vertex.getVERTEX_DIAMETER() / 10f));
         model.getEdges().forEach(e -> {
             g2D.setColor(e.isSelected() ? Vertex.getVERTEX_SELECTED_COLOR() : Vertex.getVERTEX_COLOR());
             g2D.draw(new Line2D.Float(e.getStart(), e.getEnd()));

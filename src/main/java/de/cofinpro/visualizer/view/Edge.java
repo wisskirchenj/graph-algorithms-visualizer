@@ -7,7 +7,8 @@ import java.awt.Point;
 
 /**
  * very lightweight Edge class (extending JComponent - only because Hs-tests demand it). It does NOT care for its own
- * painting, because we do that in the GraphPanel to get the layering right. It just stores its start and end point.
+ * painting, because we do that in the GraphPanel to get the layering right. It just stores its start and end point
+ * and selection state.
  */
 @Getter
 public class Edge extends JComponent {

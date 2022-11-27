@@ -114,6 +114,7 @@ public class GraphVisualizer extends JFrame {
         algorithmMenu.setName("Algorithms");
         algorithmMenu.add(createMenuItem(AlgorithmType.DEPTH_FIRST));
         algorithmMenu.add(createMenuItem(AlgorithmType.BREADTH_FIRST));
+        algorithmMenu.add(createMenuItem(AlgorithmType.DIJKSTRA_ALGORITHM));
         return algorithmMenu;
     }
 
@@ -143,10 +144,10 @@ public class GraphVisualizer extends JFrame {
                 .forEach(corner -> graph.addVertex(String.valueOf(corner.ordinal()),
                         switch (corner) {
                             case NW -> new Point(0, 0);
-                            case NE -> new Point(GRAPH_WIDTH - getVERTEX_RADIUS(), 0);
-                            case SW -> new Point(0,GRAPH_HEIGHT - getVERTEX_RADIUS() - HEIGHT_OFFSET);
-                            case SE -> new Point(GRAPH_WIDTH - getVERTEX_RADIUS(),
-                                    GRAPH_HEIGHT - getVERTEX_RADIUS() - HEIGHT_OFFSET);
+                            case NE -> new Point(GRAPH_WIDTH - getVERTEX_DIAMETER(), 0);
+                            case SW -> new Point(0,GRAPH_HEIGHT - getVERTEX_DIAMETER() - HEIGHT_OFFSET);
+                            case SE -> new Point(GRAPH_WIDTH - getVERTEX_DIAMETER(),
+                                    GRAPH_HEIGHT - getVERTEX_DIAMETER() - HEIGHT_OFFSET);
                         }));
     }
 }
