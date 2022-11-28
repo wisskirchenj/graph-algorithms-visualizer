@@ -12,6 +12,6 @@
         <module name="graph-algorithms-visualizer.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="17" />
+    <bytecodeTargetLevel target="19" />
   </component>
 </project>
