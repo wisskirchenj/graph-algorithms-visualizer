@@ -25,7 +25,7 @@ Have fun!
 
 ## Project completion
 
-[//]: # (Project was completed on 21.05.22.)
+Project was completed on 28.11.22
 
 ## Progress
 
@@ -54,3 +54,8 @@ traversal by highlighting each traversed edge and vertex in slow motion.
 27.11.22 Stage 6 completed. Algorithm Menu got new item "Dijkstra's Algorithm", which if chosen asks the user to click on
 a start vertex (as all algorithm) and then performs a Dijkstra search to calculate the shortest paths to all other vertices
 based on the edge weights given. The result is displyed in the status bar.
+
+28.11.22 Final Stage 7 completed. Prim's Algorithm added to Algorithm menu, which is run to determine a minimal spanning
+tree of the graph (component), that the selected starting vertex belongs to. Minimal spanning tree means, that the sum
+of all edge weights of this spanning tree is minimal amongst all possible spanning trees. The growing spanning tree is
+played in slow motion - as with the traversal algorithms and a "child=parent" pair list is displayd in the status label.

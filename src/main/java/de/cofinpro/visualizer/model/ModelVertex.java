@@ -40,6 +40,6 @@ public class ModelVertex {
     @Override
     public String toString() {
         return "ModelVertex{vertex:'" + vertex.getVertexLabel() +"', selected: " + selected
-                +"', visited: " + visited + ", edges" + edges + "}";
+                + "', visited: " + visited + ", edges" + edges + "}";
     }
 }

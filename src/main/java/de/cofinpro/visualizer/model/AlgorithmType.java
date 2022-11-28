@@ -1,9 +1,6 @@
 package de.cofinpro.visualizer.model;
 
-import de.cofinpro.visualizer.controller.Algorithm;
-import de.cofinpro.visualizer.controller.BreadthFirstSearch;
-import de.cofinpro.visualizer.controller.DepthFirstSearch;
-import de.cofinpro.visualizer.controller.DijkstraAlgorithm;
+import de.cofinpro.visualizer.controller.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -19,7 +16,8 @@ public enum AlgorithmType {
     NONE("", null),
     DEPTH_FIRST("Depth-First Search", DepthFirstSearch::new),
     BREADTH_FIRST("Breadth-First Search", BreadthFirstSearch::new),
-    DIJKSTRA_ALGORITHM("Dijkstra's Algorithm", DijkstraAlgorithm::new);
+    DIJKSTRA_ALGORITHM("Dijkstra's Algorithm", DijkstraAlgorithm::new),
+    PRIM_ALGORITHM("Prim's Algorithm", PrimAlgorithm::new);
 
     private final String algorithmName;
     private final Supplier<Algorithm> algorithmProducer;

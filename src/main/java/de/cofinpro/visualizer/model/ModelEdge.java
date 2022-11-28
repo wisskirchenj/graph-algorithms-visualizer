@@ -10,9 +10,9 @@ import java.util.Set;
 
 /**
  * Immutable ModelEdge structure to be used in the GraphModel, that groups the Swing components of an edge and
- * has the neighbor vertex, the edge connects to. It "sits in" a ModelVertex's edge list.
+ * keeps the vertices, the edge connects. It "sits in" the  ModelVertex start's edge list.
  */
-public record ModelEdge(Edge from, Edge to, JLabel weightLabel, ModelVertex neighborVertex) {
+public record ModelEdge(Edge from, Edge to, JLabel weightLabel, ModelVertex start, ModelVertex end) {
 
     /**
      * convenience method that returns only the edge associated swing components as a set (2 Edges and JLabel)
@@ -23,6 +23,6 @@ public record ModelEdge(Edge from, Edge to, JLabel weightLabel, ModelVertex neig
 
     @Override
     public String toString() {
-        return "ModelEdge{from: " + from.getName() + ", to: " + to.getName() + ", weight: " + weightLabel.getName() + "}";
+        return "ModelEdge{from: " + from.getName() + ", weight: " + weightLabel.getName() + "}";
     }
 }

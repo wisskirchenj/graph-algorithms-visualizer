@@ -16,7 +16,7 @@ public class DepthFirstSearch extends Algorithm {
         var traverseQueue = getApplicationModel().getGraphModel().depthFirstSearch(vertex);
         String result = "DFS : " + vertex.getVertexLabel();
         if (!traverseQueue.isEmpty()) {
-            result += " -> " + traverseQueue.stream().map(ModelEdge::neighborVertex)
+            result += " -> " + traverseQueue.stream().map(ModelEdge::end)
                     .map(ModelVertex::getVertex).map(Vertex::getVertexLabel).collect(Collectors.joining(" -> "));
         }
         setResult(result);

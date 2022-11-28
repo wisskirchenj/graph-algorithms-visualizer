@@ -115,6 +115,7 @@ public class GraphVisualizer extends JFrame {
         algorithmMenu.add(createMenuItem(AlgorithmType.DEPTH_FIRST));
         algorithmMenu.add(createMenuItem(AlgorithmType.BREADTH_FIRST));
         algorithmMenu.add(createMenuItem(AlgorithmType.DIJKSTRA_ALGORITHM));
+        algorithmMenu.add(createMenuItem(AlgorithmType.PRIM_ALGORITHM));
         return algorithmMenu;
     }
 
@@ -132,7 +133,7 @@ public class GraphVisualizer extends JFrame {
         return menuItem;
     }
 
-    private Component createMenuItem(AlgorithmType algorithmType) {
+    private JMenuItem createMenuItem(AlgorithmType algorithmType) {
         JMenuItem menuItem = new JMenuItem(algorithmType.getAlgorithmName());
         menuItem.setName(algorithmType.getAlgorithmName());
         menuItem.addActionListener(new AlgorithmMenuItemListener(algorithmType, applicationModel));

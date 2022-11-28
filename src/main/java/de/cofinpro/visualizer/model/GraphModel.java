@@ -49,8 +49,8 @@ public class GraphModel implements Serializable {
         edges.add(edge);
         var start = vertices.get(edge.getStart());
         var end = vertices.get(edge.getEnd());
-        start.addModelEdge(new ModelEdge(edge, reversedEdge, weightLabel, end));
-        end.addModelEdge(new ModelEdge(reversedEdge, edge, weightLabel, start));
+        start.addModelEdge(new ModelEdge(edge, reversedEdge, weightLabel, start, end));
+        end.addModelEdge(new ModelEdge(reversedEdge, edge, weightLabel, end, start));
     }
 
     public ModelVertex getModelVertex(Vertex vertex) {
@@ -78,9 +78,9 @@ public class GraphModel implements Serializable {
         componentsToRemove.addAll(modelEdge.getEdgeComponents());
         edges.remove(modelEdge.to());
         edges.remove(modelEdge.from());
-        var oppositeModelEdge = modelEdge.neighborVertex().getEdges().stream()
+        var oppositeModelEdge = modelEdge.end().getEdges().stream()
                 .filter(me -> me.to() == modelEdge.from()).findFirst();
-        oppositeModelEdge.ifPresent(modelEdge.neighborVertex().getEdges()::remove);
+        oppositeModelEdge.ifPresent(modelEdge.end().getEdges()::remove);
     }
 
     /**
@@ -134,7 +134,7 @@ public class GraphModel implements Serializable {
      * @param edge the ModelEdge pointing towards the vertex to select.
      */
     public void selectEdgeAndNeighborVertex(ModelEdge edge) {
-        selectVertex(edge.neighborVertex());
+        selectVertex(edge.end());
         if (edges.contains(edge.from())) {
             edge.from().select();
         } else {
@@ -156,10 +156,10 @@ public class GraphModel implements Serializable {
 
     private Queue<ModelEdge> depthFirstSearch(Queue<ModelEdge> traverseQueue, ModelVertex vertex) {
         for (var edge: vertex.getEdges()) {
-            if (!edge.neighborVertex().isVisited()) {
-                edge.neighborVertex().setVisited(true);
+            if (!edge.end().isVisited()) {
+                edge.end().setVisited(true);
                 traverseQueue.offer(edge);
-                depthFirstSearch(traverseQueue, edge.neighborVertex());
+                depthFirstSearch(traverseQueue, edge.end());
             }
         }
         return traverseQueue;
@@ -183,14 +183,14 @@ public class GraphModel implements Serializable {
         }
         var unvisitedNeighborEdges = levelVertices.stream()
                 .flatMap(vertex -> vertex.getEdges().stream())
-                .filter(edge -> !edge.neighborVertex().isVisited()).toList();
+                .filter(edge -> !edge.end().isVisited()).toList();
         unvisitedNeighborEdges.forEach(edge -> {
-            if (!edge.neighborVertex().isVisited()) {
-                edge.neighborVertex().setVisited(true);
+            if (!edge.end().isVisited()) {
+                edge.end().setVisited(true);
                 traverseQueue.offer(edge);
             }
         });
-        breadthFirstSearch(traverseQueue, unvisitedNeighborEdges.stream().map(ModelEdge::neighborVertex).toList());
+        breadthFirstSearch(traverseQueue, unvisitedNeighborEdges.stream().map(ModelEdge::end).toList());
         return traverseQueue;
     }
 }

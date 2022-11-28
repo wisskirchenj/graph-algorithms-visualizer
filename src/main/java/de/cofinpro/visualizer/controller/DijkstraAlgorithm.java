@@ -4,11 +4,18 @@ import de.cofinpro.visualizer.model.ModelEdge;
 import de.cofinpro.visualizer.model.ModelVertex;
 import de.cofinpro.visualizer.view.Vertex;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * actual implementation of the Dijkstra Algorithm using a priority queue.
+ * actual implementation of the Dijkstra Algorithm for shortest route tracking using a priority queue.
  */
 public class DijkstraAlgorithm extends Algorithm {
 
@@ -62,7 +69,7 @@ public class DijkstraAlgorithm extends Algorithm {
      */
     private void processUnprocessedNeighbors(ModelVertex vertex) {
         vertex.getEdges().stream()
-                .filter(edge -> !processed.contains(edge.neighborVertex()))
+                .filter(edge -> !processed.contains(edge.end()))
                 .forEach(edge -> dijkstraUpdateNeighbor(vertex, edge, Integer.parseInt(edge.weightLabel().getText())));
     }
 
@@ -72,7 +79,7 @@ public class DijkstraAlgorithm extends Algorithm {
      */
     private void dijkstraUpdateNeighbor(ModelVertex vertex, ModelEdge edgeToNeighbor, int edgeWeight) {
         int lengthOnThisRoute = routeLengths.get(vertex) + edgeWeight;
-        var neighbor = edgeToNeighbor.neighborVertex();
+        var neighbor = edgeToNeighbor.end();
         int lengthSoFar = Optional.ofNullable(routeLengths.get(neighbor)).orElse(Integer.MAX_VALUE);
         if (lengthOnThisRoute < lengthSoFar) {
             vertexQueue.offer(new VertexWithRouteLength(neighbor, lengthOnThisRoute));
