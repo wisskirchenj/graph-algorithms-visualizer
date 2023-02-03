@@ -2,8 +2,8 @@ plugins {
     application
 }
 
-rootProject.group = "de.cofinpro"
-rootProject.version = "0.0.1-SNAPSHOT"
+group = "de.cofinpro"
+version = "0.0.1-SNAPSHOT"
 
 application {
     mainClass.set("de.cofinpro.visualizer.ApplicationRunner")
