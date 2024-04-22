@@ -74,7 +74,7 @@ public class GraphVisualizer extends JFrame {
     private Component createDisplayPanel() {
         var displayPanel = new JPanel(new FlowLayout());
         displayPanel.setBackground(PANEL_COLOR);
-        var displayLabel = new ResultLabel(" ");
+        var displayLabel = new ResultLabel(null);
         applicationModel.registerListener(displayLabel);
         displayPanel.add(displayLabel);
         return displayPanel;
